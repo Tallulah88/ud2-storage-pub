@@ -18,7 +18,13 @@ class HelloWorldController extends Controller
      */
     public function index()
     {
-        //todo
+        // Listar archivos en la carpeta raíz de storage/app
+        $files = Storage::files('/');
+
+        return response()->json([
+            'mensaje' => 'Listado de ficheros',
+            'contenido' => $files,
+        ]);
     }
 
      /**
@@ -32,9 +38,28 @@ class HelloWorldController extends Controller
      * El JSON devuelto debe tener las siguientes claves:
      * - mensaje: Un mensaje indicando el resultado de la operación.
      */
+
     public function store(Request $request)
     {
-        //todo
+        // Validar que 'filename' y 'content' son obligatorios
+        $validated = $request->validate([
+            'filename' => 'required|string',
+            'content' => 'required|string',
+        ]);
+
+        // Verificar si el archivo ya existe; si es así, devolver 409 Conflict
+        if (Storage::exists($validated['filename'])) {
+            return response()->json([
+                'mensaje' => 'El archivo ya existe',
+            ], 409);
+        }
+
+        // Crear el archivo con el contenido proporcionado
+        Storage::put($validated['filename'], $validated['content']);
+
+        return response()->json([
+            'mensaje' => 'Guardado con éxito',
+        ]);
     }
 
      /**
@@ -49,7 +74,20 @@ class HelloWorldController extends Controller
      */
     public function show(string $filename)
     {
-        //todo
+        // Comprobar si el archivo existe; si no, devolver 404 Not Found
+        if (!Storage::exists($filename)) {
+            return response()->json([
+                'mensaje' => 'Archivo no encontrado',
+            ], 404);
+        }
+
+        // Leer el contenido del archivo
+        $content = Storage::get($filename);
+
+        return response()->json([
+            'mensaje' => 'Archivo leído con éxito',
+            'contenido' => $content,
+        ]);
     }
 
     /**
@@ -66,7 +104,24 @@ class HelloWorldController extends Controller
      */
     public function update(Request $request, string $filename)
     {
-        //todo
+        // Validar que 'content' es obligatorio
+        $validated = $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        // Comprobar si el archivo existe; si no, devolver 404 Not Found
+        if (!Storage::exists($filename)) {
+            return response()->json([
+                'mensaje' => 'El archivo no existe',
+            ], 404);
+        }
+
+        // Actualizar el archivo con el nuevo contenido
+        Storage::put($filename, $validated['content']);
+
+        return response()->json([
+            'mensaje' => 'Actualizado con éxito',
+        ]);
     }
 
     /**
@@ -81,6 +136,18 @@ class HelloWorldController extends Controller
      */
     public function destroy(string $filename)
     {
-        //todo
+        // Comprobar si el archivo existe; si no, devolver 404 Not Found
+        if (!Storage::exists($filename)) {
+            return response()->json([
+                'mensaje' => 'El archivo no existe',
+            ], 404);
+        }
+
+        // Eliminar el archivo
+        Storage::delete($filename);
+
+        return response()->json([
+            'mensaje' => 'Eliminado con éxito',
+        ]);
     }
 }
