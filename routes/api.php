@@ -3,14 +3,20 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HelloWorldController;
+use App\Http\Controllers\JsonController;
+use App\Http\Controllers\CsvController;
 
+// Rutas para HelloWorldController
 Route::apiResource('hello', HelloWorldController::class);
 
-use App\Http\Controllers\JsonController;
+// Rutas para JsonController (utilizando apiResource)
+Route::apiResource('json', JsonController::class);
 
-// Rutas para JsonController
-Route::get('/json', [JsonController::class, 'index']);
-Route::post('/json', [JsonController::class, 'store']);
-Route::get('/json/{id}', [JsonController::class, 'show']);
-Route::put('/json/{id}', [JsonController::class, 'update']);
-Route::delete('/json/{id}', [JsonController::class, 'destroy']);
+// Rutas para CsvController
+Route::prefix('csv')->group(function () {
+    Route::get('/', [CsvController::class, 'index']);
+    Route::post('/', [CsvController::class, 'store']);
+    Route::get('/{id}', [CsvController::class, 'show']);
+    Route::put('/{id}', [CsvController::class, 'update']);
+    Route::delete('/{id}', [CsvController::class, 'destroy']);
+});
